@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginTop="20.0dip"
+	    android:orientation="horizontal">
+	    <Button
+	        android:id="@+id/btnConsume"
+	        style="@style/btn_request_style"
+	        android:layout_marginLeft="15dp"
+	        android:text="@string/btn_consume_msg" />
+	    
+	    <Button
+	        android:id="@+id/btnSignIn"
+	        style="@style/btn_request_style"
+	        android:layout_marginLeft="15dp"
+	        android:text="@string/btn_sign_in_posp_msg" />
+	    
+	</LinearLayout>
+	
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/resultText"
+        android:textSize="@dimen/common_text_view_text_size"
+        android:layout_marginTop="21.0dip"
+        android:layout_marginLeft="10dp" />
+    
+
+</LinearLayout>
