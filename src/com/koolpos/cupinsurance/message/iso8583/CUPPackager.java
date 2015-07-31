@@ -1925,7 +1925,9 @@ public class CUPPackager implements Constant {
 								.getTrack2Data().length() + 1) / 2];
 						ByteUtil.asciiToBCD(appState.trans.getTrack2Data()
 								.getBytes(), 0, track2Data, 0, appState.trans
-								.getTrack2Data().length(), 0);*/
+								.getTrack2Data().length(), 0);
+						movGen(CUPField.F35_TRACK2, track2Data, appState.trans.getTrack2Data().length());*/
+						
 						// TODO 对数据加密
 						String track2Str = appState.trans.getTrack2Data();
 	                    Log.w("Track2", "--------track2:" + track2Str);
@@ -1938,7 +1940,6 @@ public class CUPPackager implements Constant {
 	                    byte[] realData = new byte[encrypteLen];
 	                    System.arraycopy(encryptTrack2Data, 0, realData, 0, encrypteLen);
 
-//						movGen(CUPField.F35_TRACK2, track2Data, appState.trans.getTrack2Data().length());
 	                    movGen(CUPField.F35_TRACK2, realData, encrypteLen);
 					}
 					break;
@@ -1960,9 +1961,6 @@ public class CUPPackager implements Constant {
 
 	                    byte[] realData = new byte[track3Len];
 	                    System.arraycopy(encryptTrack2Data, 0, realData, 0, track3Len);
-
-	                    /*byte[] track3Data = new byte[(track3Len + 1) / 2];
-	                    ByteUtil.asciiToBCD(realData, 0, track3Data, 0, track3Len, 0);*/
 
 	                    movGen(CUPField.F36_TRACK3, realData, track3Len);
 					}
