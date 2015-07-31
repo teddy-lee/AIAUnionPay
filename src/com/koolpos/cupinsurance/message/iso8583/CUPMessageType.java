@@ -8,8 +8,8 @@ import com.koolpos.cupinsurance.message.utils.StringUtil;
 public class CUPMessageType implements Constant {
 	public static MessageTypeTable[] messageTypeTable = {
 			new MessageTypeTable(TRAN_BALANCE, "0200", "310000", "00", "01"), // 0
-			new MessageTypeTable(TRAN_SALE, "0200", "000000", "00", "22"), // 1
-			new MessageTypeTable(TRAN_SALE, "0210", "000000", "00", "22"), // 1
+			new MessageTypeTable(TRAN_SALE, "0200", "190000", "00", "22"), // 1
+			new MessageTypeTable(TRAN_SALE, "0210", "190000", "00", "22"), // 1
 			new MessageTypeTable(TRAN_VOID, "0200", "200000", "00", "23"), // 2
 			new MessageTypeTable(TRAN_VOID, "0210", "200000", "00", "23"), // 2
 			new MessageTypeTable(TRAN_REFUND, "0220", "200000", "00", "25"), // 3
@@ -132,7 +132,7 @@ public class CUPMessageType implements Constant {
 			 * "000000"), // 68 new MessageTypeTable(TRAN_SALE_9140, "0200",
 			 * "000000"), // 69
 			 */
-			new MessageTypeTable(TRAN_SALE_REVERSAL, "0400", "000000", "00",
+			new MessageTypeTable(TRAN_SALE_REVERSAL, "0400", "190000", "00",
 					"22"), // 70
 			new MessageTypeTable(TRAN_REVOCATION_REVERSAL, "0400", "200000",
 					"00", "22"),// 71

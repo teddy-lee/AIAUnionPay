@@ -40,6 +40,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	byte[] data;// = hex2byte("00456000010000000000000000000000000000000060211000000008000020000000C0001000000130303030303030313838383838383831303030303031300011010000010030");
 
 	String data8583 = "";
+	String payKeyIndex = "01";
 	
 	 private final int FINISH_TRANSACTION_HANDLER = 1;
 	 private CardSwiper ex_cardSwiper;
@@ -147,7 +148,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
                         try {
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("pan", trackData.get("pan"));
-                            jsonObject.put("brhKeyIndex", "00");
+                            jsonObject.put("brhKeyIndex", payKeyIndex);
                             jsonObject.put("transAmount", transAmount);
 
                             transJsonObj.put("pan", trackData.get("pan"));
@@ -265,6 +266,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
                         e.printStackTrace();
                     }
                     UtilFor8583.getInstance().trans.setEntryMode(ConstantUtils.ENTRY_IC_MODE);
+                    onStopReadICData();
                     makeTransactionParams();
                     new ExeTransactionThread().start();
                     break;
@@ -308,6 +310,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
     public void onStartReadICData(Context context, String keyIndex, String transAmountIC) {
         if (emvManager == null) {
             emvManager = EMVICManager.getEMVICManagerInstance();
+            UtilFor8583.getInstance().terminalConfig.setKeyIndex(payKeyIndex);
             emvManager.setTransAmount(transAmountIC);
             emvManager.onCreate(context, mICDataHandler);
         }
@@ -356,7 +359,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
             transJsonObj.put("pwd", pinblock);
             transJsonObj.put("F52", pinblock);
             transJsonObj.put("transType", "1021");
-            transJsonObj.put("brhKeyIndex", "00");
+            transJsonObj.put("brhKeyIndex", payKeyIndex);
             transJsonObj.put("F04", "1");
             transJsonObj.put("transAmount", "1");
             transJsonObj.put("F62", "8686860211000496799");
@@ -383,7 +386,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888810000010", "00000001");
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888820000002", "00000001", payKeyIndex);
 			JSONObject signInObj = iso8583.signIn();
 			System.out.println(signInObj.toString());
 		}
@@ -393,7 +396,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	class ExeTransactionThread extends Thread {
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888810000010", "00000001");
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888820000002", "00000001", payKeyIndex);
 			JSONObject transObj = iso8583.exeTransaction(transJsonObj);
 			if (null != transObj) {
 				System.out.println(transObj.toString());

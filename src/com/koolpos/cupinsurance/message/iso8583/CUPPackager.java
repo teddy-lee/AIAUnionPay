@@ -1895,7 +1895,7 @@ public class CUPPackager implements Constant {
 								}
 
 							} else {
-								F25_POCC[0] = 0x00;
+								F25_POCC[0] = (byte) 0x82;
 								break;
 							}
 					}
@@ -2083,7 +2083,7 @@ public class CUPPackager implements Constant {
 						if (appState.trans.getTrack2Data() == null) {
 							F53_SCI[1] = 0x00;
 						} else {
-							F53_SCI[1] = 0x00;
+							F53_SCI[1] = 0x10;
 
 						}
 						movGen(CUPField.F53_SCI, F53_SCI, 0);
@@ -2195,9 +2195,9 @@ public class CUPPackager implements Constant {
 			appState.trans.setParamDownloadFlag(false);
 		}
 		if (appState.trans.getTransType() == TRAN_LOGIN) {
-			if (!CapkManager.paramsFilesIsExists()) {
+//			if (!CapkManager.paramsFilesIsExists()) {
 				CapkManager.updateParams();
-			}
+//			}
 		}
 		offset += 6;
 

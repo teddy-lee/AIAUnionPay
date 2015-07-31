@@ -35,12 +35,6 @@ import com.koolpos.cupinsurance.message.utils.Utility;
 
 public class CUP8583Controller implements Constant {
 
-	private static final String ZHIFUCHONGZHENG = "zhifuchongzheng"; // 普通冲正
-	private static final String CHEXIAOCHONGZHENG = "chexiaochongzheng";// 撤销冲正
-	private static final String PREAUTHREVERSE = "preauthreverse";// 预授冲正
-	private static final String PREAUTHCOMPLETEREVERSE = "preauthcompletereverse";// 预授冲正
-	private static final String PREAUTHCANCELREVERSE = "preauthcancelreverse";// 预授冲正
-	private static final String PREAUTHCOMPLETECANCELREVERSE = "preauthcompletecancelreverse";// 预授冲正
 	private String errorType = null;
 	private String mId = "";
 	private String tId = "";
@@ -380,6 +374,67 @@ public class CUP8583Controller implements Constant {
 		// fix no pin block end
 		return mapAndPack(jsonObject, bitMap);
 	}
+	
+	public boolean identityAuthentication(JSONObject jsonObject) {
+		paramer.trans.setTransType(TRAN_CHECK_CARDHOLDER);
+		paramer.trans.setApmpTransType(APMP_TRAN_CONSUME);
+		paramer.trans.setExpiry(jsonObject.optString("validTime"));
+		// fix no pin block original start
+		/*
+		 * int[] bitMap = { CUPField.F02_PAN, CUPField.F03_PROC,
+		 * CUPField.F04_AMOUNT, CUPField.F11_STAN, CUPField.F14_EXP,
+		 * CUPField.F22_POSE, CUPField.F23, CUPField.F25_POCC,
+		 * CUPField.F26_CAPTURE, CUPField.F35_TRACK2, CUPField.F36_TRACK3,
+		 * CUPField.F38_AUTH, CUPField.F39_RSP, CUPField.F40, CUPField.F41_TID,
+		 * CUPField.F42_ACCID, CUPField.F49_CURRENCY, CUPField.F52_PIN,
+		 * CUPField.F53_SCI, CUPField.F55_ICC, CUPField.F60, CUPField.F64_MAC };
+		 */
+		// fix no pin block original end
+
+		// fix no pin block start
+		int[] bitMap = null;
+		String pinblock = jsonObject.optString("F52");
+		if (!pinblock.isEmpty()) {
+			if (pinblock.equals(ConstantUtils.STR_NULL_PIN)) {
+				paramer.trans.setPinMode(ConstantUtils.NO_PIN);
+				bitMap = new int[] { CUPField.F02_PAN, CUPField.F03_PROC,
+						CUPField.F04_AMOUNT, CUPField.F11_STAN,
+						CUPField.F14_EXP, CUPField.F22_POSE, CUPField.F23,
+						CUPField.F25_POCC, CUPField.F26_CAPTURE,
+						CUPField.F35_TRACK2, CUPField.F36_TRACK3,
+						CUPField.F41_TID, CUPField.F42_ACCID, CUPField.F48,
+						CUPField.F49_CURRENCY, CUPField.F55_ICC, CUPField.F60,
+						CUPField.F64_MAC };
+			} else {
+				paramer.trans.setPinMode(ConstantUtils.HAVE_PIN);
+				paramer.trans.setPinBlock(Utility.hex2byte(pinblock));
+				bitMap = new int[] { CUPField.F02_PAN, CUPField.F03_PROC,
+						CUPField.F04_AMOUNT, CUPField.F11_STAN,
+						CUPField.F14_EXP, CUPField.F22_POSE, CUPField.F23,
+						CUPField.F25_POCC, CUPField.F26_CAPTURE,
+						CUPField.F35_TRACK2, CUPField.F36_TRACK3,
+						CUPField.F41_TID, CUPField.F42_ACCID, CUPField.F48,
+						CUPField.F49_CURRENCY, CUPField.F52_PIN,
+						CUPField.F53_SCI, CUPField.F55_ICC, CUPField.F60,
+						CUPField.F64_MAC };
+			}
+		} else {
+			bitMap = new int[] { CUPField.F02_PAN, CUPField.F03_PROC,
+					CUPField.F04_AMOUNT, CUPField.F11_STAN, CUPField.F14_EXP,
+					CUPField.F22_POSE, CUPField.F23, CUPField.F25_POCC,
+					CUPField.F26_CAPTURE, CUPField.F35_TRACK2,
+					CUPField.F36_TRACK3,
+					/* CUPField.F38_AUTH, *//* CUPField.F39_RSP, *//*
+																	 * CUPField.F40
+																	 * ,
+																	 */
+					CUPField.F41_TID, CUPField.F42_ACCID, CUPField.F48,
+					CUPField.F49_CURRENCY, CUPField.F52_PIN, CUPField.F53_SCI,
+					CUPField.F55_ICC, CUPField.F60, CUPField.F64_MAC };
+		}
+		// fix no pin block end
+		return mapAndPack(jsonObject, bitMap);
+	}
 
 	public boolean superTransfer(JSONObject jsonObject) {
 		paramer.trans.setTransType(TRAN_SUPER_TRANSFER);
@@ -459,23 +514,15 @@ public class CUP8583Controller implements Constant {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean chongZheng(byte[] iso8583, String oldTransDate, String name)
+	public boolean chongZheng(byte[] iso8583, String orignalTransType)
 			throws Exception {
 
 		byte[] data = new byte[iso8583.length - 2];
 		System.arraycopy(iso8583, 2, data, 0, data.length - 2);
-		if (name.equals(CHEXIAOCHONGZHENG)) {
+		if (orignalTransType.equals(ConstantUtils.APMP_TRAN_TYPE_CONSUMECANCE)) {
 			paramer.trans.setTransType(TRAN_REVOCATION_REVERSAL);
-		} else if (name.equals(ZHIFUCHONGZHENG)) {
+		} else if (orignalTransType.equals(ConstantUtils.APMP_TRAN_TYPE_CONSUME)) {
 			paramer.trans.setTransType(TRAN_SALE_REVERSAL);
-		} else if (name.equals(PREAUTHREVERSE)) {
-			paramer.trans.setTransType(TRAN_AUTH_REVERSAL);
-		} else if (name.equals(PREAUTHCOMPLETEREVERSE)) {
-			paramer.trans.setTransType(TRAN_AUTH_COMPLETE_REVERSAL);
-		} else if (name.equals(PREAUTHCANCELREVERSE)) {
-			paramer.trans.setTransType(TRAN_AUTH_CANCEL_REVERSAL);
-		} else if (name.equals(PREAUTHCOMPLETECANCELREVERSE)) {
-			paramer.trans.setTransType(TRAN_AUTH_COMPLETE_CANCEL_REVERSAL);
 		}
 		paramer.trans.setApmpTransType(APMP_TRAN_OFFSET);
 
@@ -489,7 +536,7 @@ public class CUP8583Controller implements Constant {
 		}
 		paramer.oldTrans = oldTrans;
 		paramer.oldTrans.toString();
-		paramer.oldTrans.setOldTransDate(oldTransDate);
+//		paramer.oldTrans.setOldTransDate(oldTransDate);
 		paramer.trans.setPAN(oldTrans.getOldPan());
 		paramer.trans.setTransAmount(oldTrans.getOldTransAmount());
 		paramer.trans.setPinMode(oldTrans.getOldPinMode());
@@ -1356,16 +1403,17 @@ public class CUP8583Controller implements Constant {
 	private boolean calculateMAC2(final byte[] data, byte[] dataOut,
 			UtilFor8583 appState) {
 		String strDebug = "";
-		if (debug) {
-			strDebug = StringUtil.toBestString(data);
-			Log.d(APP_TAG, "check 1 MAC Data: " + strDebug);
-			strDebug = "";
+		
+		//print message with best string
+		strDebug = StringUtil.toBestString(data);
+		Log.d(APP_TAG, "check 1 MAC Data: " + strDebug);
+		strDebug = "";
 
-			for (int i = 0; i < data.length - 11; i++) {
-				strDebug += String.format("%02X ", data[11 + i]);
-			}
-			Log.d(APP_TAG, "check 2 MAC Data: " + strDebug);
+		//calculate MAB, rm TPDU, message header, only left 8583 message.
+		for (int i = 0; i < data.length - 11 - 14; i++) {
+			strDebug += String.format("%02X ", data[11 + 14 + i]);
 		}
+		Log.d(APP_TAG, "check 2 MAC Data: " + strDebug);
 
 		byte[] encryptData = StringUtil.hexString2bytes(strDebug);
 		PinPadInterface.open();

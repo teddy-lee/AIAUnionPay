@@ -40,9 +40,11 @@ public class CUPChongZheng implements Constant {
 
 		// TPDU
 		offset += 5;
+		// ANI
+		offset += 14;
 		// APDU
 		offset += 6;
-
+		
 		iso.setOffset((short) 0);
 		iso.setDataBuffer(databuf, offset, databuf.length - offset);
 		System.arraycopy(databuf, offset, F_MessageType, 0, 2);
