@@ -1,13 +1,8 @@
 package com.koolpos.cupinsurance.network;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -18,11 +13,13 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import android.content.Context;
+
 import com.koolpos.cupinsurance.message.utils.StringUtil;
 
 public class NetConnection {
 
-	public String socketConnect(String req8583) {
+	public String socketConnect(Context context, String req8583) throws Exception {
 		X509TrustManager x509m = new X509TrustManager() {
 
 			@Override
@@ -39,6 +36,7 @@ public class NetConnection {
 			}
 		};
 
+		SSLSocket socket = null;
 		try {
 			
 			String res8583 = "";
@@ -48,7 +46,7 @@ public class NetConnection {
 
 			SSLSocketFactory sslSocketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
 
-			SSLSocket socket = (SSLSocket) sslSocketFactory.createSocket("103.6.222.170", 33161);
+			socket = (SSLSocket) sslSocketFactory.createSocket("103.6.222.170", 33161);
 
 			// 设置超时时间
 			socket.setSoTimeout(60 * 1000);
@@ -97,17 +95,12 @@ public class NetConnection {
 			res8583 = StringUtil.byte2HexStr(response);
 			
 			return res8583;
-		} catch (KeyManagementException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} finally {
+			try {
+				socket.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		return null;
 	}
 }

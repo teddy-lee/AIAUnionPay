@@ -7,5 +7,8 @@
     
     <string name="btn_consume_msg">消费</string>
     <string name="btn_sign_in_posp_msg">签到</string>
+    <string name="btn_consume_msg2">消费2</string>
+    <string name="btn_sign_in_posp_msg2">签到2</string>
+    <string name="btn_identity_auth_msg">实名认证</string>
 
 </resources>

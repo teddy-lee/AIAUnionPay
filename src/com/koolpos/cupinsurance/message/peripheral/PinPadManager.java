@@ -28,7 +28,7 @@ public class PinPadManager {
 	private final String TAG = "PinPadManager";
 	private static int TIME_INPUT = 300000;
 	public static PinPadManager ppM_instance = null;
-	private UtilFor8583 util8583 = UtilFor8583.getInstance();
+	private UtilFor8583 util8583 = null;
 
 	public static final int MODE_INPUT_AUTH_CODE = 0xF0;
 	public static final int STATUS_VALUE_4 = 0x24;
@@ -50,10 +50,11 @@ public class PinPadManager {
 	}
 
 	public void start(){
+		util8583 = UtilFor8583.getInstance();
 		brhKeyIndex = transData.optString("brhKeyIndex","00");
-		if (brhKeyIndex != null && !brhKeyIndex.equals("")) {
+		/*if (brhKeyIndex != null && !brhKeyIndex.equals("")) {
 			util8583.terminalConfig.setKeyIndex(brhKeyIndex);
-		}
+		}*/
 		handlerThread = new HandlerThread("PinPadInterface");
 		handlerThread.start();
 		looper = handlerThread.getLooper();

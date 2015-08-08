@@ -29,6 +29,14 @@ public class EMVICData {
 		}
 		return emvICData;
 	}
+	
+	public void clearEMVData() {
+		emvICData = null;
+		f55 = null;
+		pinBlock = null;
+		track2 = "";
+		ICPan = null;
+	}
 
 	public String getICPan() {
 		return ICPan;

@@ -39,6 +39,7 @@ public class CUPPackager implements Constant {
 	private static CUPData iso = new CUPData();
 	private static byte[] sendData = null;
 	private static int sendDataLength = 0;
+	private static boolean needEncrypt = false;
 	/*
 	 * 对55域 的解析
 	 */
@@ -887,8 +888,7 @@ public class CUPPackager implements Constant {
 					// + 0x30);
 					// 25
 					System.arraycopy("25".getBytes(), 0, tmpBuf, 109, 2);
-					tmpBuf[111] = (byte) (Byte.parseByte(appState.terminalConfig
-							.getKeyIndex()) + 0x30);
+					tmpBuf[111] = (byte) (Byte.parseByte(UtilFor8583.getInstance().terminalConfig.getKeyIndex()) + 0x30);
 					// 51
 					System.arraycopy("51".getBytes(), 0, tmpBuf, 112, 2);
 					System.arraycopy("0011".getBytes(), 0, tmpBuf, 114, 4);
@@ -1921,48 +1921,51 @@ public class CUPPackager implements Constant {
 				case CUPField.F35_TRACK2:
 					if (appState.trans.getTrack2Data() != null
 							&& appState.trans.getTrack2Data().length() > 0) {
-						/*byte[] track2Data = new byte[(appState.trans
+						byte[] track2Data = new byte[(appState.trans
 								.getTrack2Data().length() + 1) / 2];
 						ByteUtil.asciiToBCD(appState.trans.getTrack2Data()
 								.getBytes(), 0, track2Data, 0, appState.trans
 								.getTrack2Data().length(), 0);
-						movGen(CUPField.F35_TRACK2, track2Data, appState.trans.getTrack2Data().length());*/
+						needEncrypt = false;
+						movGen(CUPField.F35_TRACK2, track2Data, appState.trans.getTrack2Data().length());
 						
 						// TODO 对数据加密
-						String track2Str = appState.trans.getTrack2Data();
+						/*String track2Str = appState.trans.getTrack2Data();
 	                    Log.w("Track2", "--------track2:" + track2Str);
 	                    Log.w("Track2", "--------track2 len:" + track2Str.length());
 
 	                    byte[] encryptTrack2Data = new byte[255];
 
 	                    int encrypteLen = Encryption8583Util.encryptData(Encryption8583Util.MSR_2TH_TRACK, track2Str, encryptTrack2Data, appState.terminalConfig.getKeyIndex());
-
+						
+						needEncrypt = true;
 	                    byte[] realData = new byte[encrypteLen];
 	                    System.arraycopy(encryptTrack2Data, 0, realData, 0, encrypteLen);
 
-	                    movGen(CUPField.F35_TRACK2, realData, encrypteLen);
+	                    movGen(CUPField.F35_TRACK2, realData, encrypteLen);*/
 					}
 					break;
 				case CUPField.F36_TRACK3:
 					if (appState.trans.getTrack3Data() != null
 							&& appState.trans.getTrack3Data().length() > 0) {
-						/*byte[] track3Data = new byte[(appState.trans.getTrack3Data().length() + 1) / 2];
+						byte[] track3Data = new byte[(appState.trans.getTrack3Data().length() + 1) / 2];
 						ByteUtil.asciiToBCD(appState.trans.getTrack3Data()
 								.getBytes(), 0, track3Data, 0, appState.trans
 								.getTrack3Data().length(), 0);
-						movGen(CUPField.F36_TRACK3, track3Data, appState.trans.getTrack3Data().length());*/
+						needEncrypt = false;
+						movGen(CUPField.F36_TRACK3, track3Data, appState.trans.getTrack3Data().length());
 						
-						String track3Str = appState.trans.getTrack3Data();
+						/*String track3Str = appState.trans.getTrack3Data();
 	                    Log.w("Track3", "-------track3:" + track3Str);
 	                    Log.w("Track3", "-------track3 len:" + track3Str.length());
 	                    byte[] encryptTrack2Data = new byte[255];
 
 	                    int track3Len = Encryption8583Util.encryptData(Encryption8583Util.MSR_3TH_TRACK, track3Str, encryptTrack2Data, appState.terminalConfig.getKeyIndex());
-
+						needEncrypt = true;
 	                    byte[] realData = new byte[track3Len];
 	                    System.arraycopy(encryptTrack2Data, 0, realData, 0, track3Len);
 
-	                    movGen(CUPField.F36_TRACK3, realData, track3Len);
+	                    movGen(CUPField.F36_TRACK3, realData, track3Len);*/
 					}
 					break;
 				case CUPField.F37_RRN:
@@ -2078,11 +2081,10 @@ public class CUPPackager implements Constant {
 								F53_SCI[0] = 0x16;
 							}
 						}
-						if (appState.trans.getTrack2Data() == null) {
-							F53_SCI[1] = 0x00;
-						} else {
+						if (needEncrypt) {
 							F53_SCI[1] = 0x10;
-
+						} else {
+							F53_SCI[1] = 0x00;
 						}
 						movGen(CUPField.F53_SCI, F53_SCI, 0);
 					}
@@ -2193,9 +2195,9 @@ public class CUPPackager implements Constant {
 			appState.trans.setParamDownloadFlag(false);
 		}
 		if (appState.trans.getTransType() == TRAN_LOGIN) {
-//			if (!CapkManager.paramsFilesIsExists()) {
+			if (!CapkManager.paramsFilesIsExists()) {
 				CapkManager.updateParams();
-//			}
+			}
 		}
 		offset += 6;
 

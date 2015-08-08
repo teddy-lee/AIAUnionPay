@@ -29,6 +29,7 @@ import com.koolpos.cupinsurance.message.peripheral.CardSwiper;
 import com.koolpos.cupinsurance.message.peripheral.EMVICManager;
 import com.koolpos.cupinsurance.message.utils.ByteUtil;
 import com.koolpos.cupinsurance.message.utils.DateUtil;
+import com.koolpos.cupinsurance.message.utils.SDCardFileTool;
 import com.koolpos.cupinsurance.message.utils.StringUtil;
 import com.koolpos.cupinsurance.message.utils.UtilForDataStorage;
 import com.koolpos.cupinsurance.message.utils.Utility;
@@ -57,9 +58,22 @@ public class CUP8583Controller implements Constant {
 		paramer.terminalConfig.setMID(mId);
 		// 设置终端号 (42域）
 		paramer.terminalConfig.setTID(tId);
-		paramer.terminalConfig.setTrace(transId);// 流水号
-		paramer.trans.setTrace(transId);
+//		paramer.terminalConfig.setTrace(transId);// 流水号
+//		paramer.trans.setTrace(transId);
 		paramer.trans.setBatchNumber(batchNumber);
+	}
+	
+	public void setTraceNo(int traceNo) {
+		this.transId = traceNo;
+	}
+	
+	public void setBatchNo(int batchNo) {
+		paramer.trans.setBatchNumber(batchNo);
+	}
+	
+	public void setMerchIdTermId(String merchId, String termId) {
+		paramer.terminalConfig.setMID(merchId);
+		paramer.terminalConfig.setTID(termId);
 	}
 
 	public boolean signin() {
@@ -67,7 +81,7 @@ public class CUP8583Controller implements Constant {
 		paramer.trans.setTransType(TRAN_LOGIN);
 		paramer.trans.setApmpTransType(APMP_TRAN_SIGNIN);
 		// 设置POS终端交易流水 (11域）
-		paramer.terminalConfig.setTrace(transId);// 流水号
+		paramer.trans.setTrace(transId);// 流水号
 
 		boolean isSuccess = pack8583(paramer);
 		if (isSuccess) {
@@ -1125,8 +1139,10 @@ public class CUP8583Controller implements Constant {
 			case CUPField.F11_STAN:
 				// POS终端交易流水 F11
 				String trace = jsonObject.optString("F11", null);
-				if (trace != null) {
+				if (!TextUtils.isEmpty(trace)) {
 					paramer.trans.setTrace(Integer.parseInt(trace));
+				} else {
+					paramer.trans.setTrace(transId);
 				}
 				break;
 			case CUPField.F35_TRACK2:
@@ -1276,7 +1292,7 @@ public class CUP8583Controller implements Constant {
 			switch (paramer.trans.getTransType()) {
 			case TRAN_LOGIN:
 				if (updateWorkingKey(paramer)) {
-					Map<String, ?> map = UtilForDataStorage
+					/*Map<String, ?> map = UtilForDataStorage
 							.readPropertyBySharedPreferences(context, UtilForDataStorage.TRANSACTION_PARAMS_PREFS_NAME);
 					int oldBatchId = ((Integer) map.get("batchId")).intValue();
 					int newBatchId = paramer.trans.getBatchNumber();
@@ -1287,7 +1303,13 @@ public class CUP8583Controller implements Constant {
 								context,
 								UtilForDataStorage.TRANSACTION_PARAMS_PREFS_NAME,
 								newMap);
+					}*/
+					
+					String batchNo = SDCardFileTool.getPiciContent();
+					if (TextUtils.isEmpty(batchNo)) {
+						batchNo = "0";
 					}
+					SDCardFileTool.writePiciFile(Integer.parseInt(batchNo) + 1 + "");
 
 				} else {
 					paramer.trans.setResponseCode("F0".getBytes());
@@ -1344,9 +1366,9 @@ public class CUP8583Controller implements Constant {
 			ret = CUPPackager.pack(false, appState);
 			break;
 		default:
-			if (appState.trans.getTransType() != TRAN_UPLOAD_MAG_OFFLINE) {
+			/*if (appState.trans.getTransType() != TRAN_UPLOAD_MAG_OFFLINE) {
 				appState.trans.setTrace(appState.terminalConfig.getTrace());
-			}
+			}*/
 
 			if (appState.trans.getTransType() == TRAN_BATCH) {
 				switch (appState.terminalConfig.getBatchStatus()) {
@@ -1419,7 +1441,7 @@ public class CUP8583Controller implements Constant {
 		PinPadInterface.open();
 
 		int ret = PinPadInterface.selectKey(2,
-				Integer.parseInt(appState.terminalConfig.getKeyIndex()), 1, SINGLE_KEY);
+				Integer.parseInt(UtilFor8583.getInstance().terminalConfig.getKeyIndex()), 1, SINGLE_KEY);
 
 		ret = PinPadInterface.calculateMac(encryptData, encryptData.length, 0x00, dataOut);
 		PinPadInterface.close(); // 关闭占用
@@ -1498,9 +1520,10 @@ public class CUP8583Controller implements Constant {
 		byte[] checkResult = new byte[8];
 
 		PinPadInterface.open();
+		String keyIndex = UtilFor8583.getInstance().terminalConfig.getKeyIndex();
 		// check pinKey
 		int nResult = PinPadInterface.updateUserKey(
-				Integer.parseInt(appState.terminalConfig.getKeyIndex()), 0,
+				Integer.parseInt(keyIndex), 0,
 				appState.PIK, appState.PIK.length);
 		if (nResult < 0) {
 			// appState.setErrorCode(R.string.error_pinpad);
@@ -1508,7 +1531,7 @@ public class CUP8583Controller implements Constant {
 		}
 		Log.d(APP_TAG, "1: updateUserKey = " + nResult);
 		nResult = PinPadInterface.selectKey(2,
-				Integer.parseInt(appState.terminalConfig.getKeyIndex()), 0,
+				Integer.parseInt(keyIndex), 0,
 				DOUBLE_KEY);
 		if (nResult < 0) {
 			// appState.setErrorCode(R.string.error_pinpad);
@@ -1540,7 +1563,7 @@ public class CUP8583Controller implements Constant {
 		Log.d(APP_TAG, "pinKey check OK");
 		// check macKey
 		nResult = PinPadInterface.updateUserKey(
-				Integer.parseInt(appState.terminalConfig.getKeyIndex()), 1,
+				Integer.parseInt(keyIndex), 1,
 				appState.MAK, appState.MAK.length);
 		Log.d(APP_TAG, "2: updateUserKey = " + nResult);
 		if (nResult < 0) {
@@ -1548,7 +1571,7 @@ public class CUP8583Controller implements Constant {
 		}
 		Log.d(APP_TAG, "invoke selectKey method!");
 		nResult = PinPadInterface.selectKey(2,
-				Integer.parseInt(appState.terminalConfig.getKeyIndex()), 1,
+				Integer.parseInt(keyIndex), 1,
 				SINGLE_KEY);
 		// Encrypt
 		Log.d(APP_TAG, "selectKey nResult = " + nResult);
@@ -1599,11 +1622,11 @@ public class CUP8583Controller implements Constant {
 		 * }
 		 */
 		nResult = PinPadInterface.updateUserKey(
-				Integer.parseInt(appState.terminalConfig.getKeyIndex()), 2, appState.TDK, appState.TDK.length);
+				Integer.parseInt(keyIndex), 2, appState.TDK, appState.TDK.length);
 		if (nResult < 0) {
 			return false;
 		}
-		nResult = PinPadInterface.selectKey(2, Integer.parseInt(appState.terminalConfig.getKeyIndex()), 2, DOUBLE_KEY);
+		nResult = PinPadInterface.selectKey(2, Integer.parseInt(keyIndex), 2, DOUBLE_KEY);
 		if (nResult < 0) {
 			return false;
 		}

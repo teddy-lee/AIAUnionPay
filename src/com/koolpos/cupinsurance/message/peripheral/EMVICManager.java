@@ -65,7 +65,7 @@ public class EMVICManager {
 	private Boolean readFlag = false;
 	private Boolean readRes = false;
 	private EMVICData mEMVICData = EMVICData.getEMVICInstance();
-	private UtilFor8583 util8583 = UtilFor8583.getInstance();
+	private UtilFor8583 util8583 = null;
 
 	private static EMVICManager emvICManger = null;
 
@@ -82,6 +82,7 @@ public class EMVICManager {
 
 	public void onCreate(Context c, Handler handler) {
 		this.mHandler = handler;
+		util8583 = UtilFor8583.getInstance();
 		// EMVL2初始化
 		init();
 	}

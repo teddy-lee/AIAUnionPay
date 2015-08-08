@@ -21,6 +21,24 @@
 	        android:layout_marginLeft="15dp"
 	        android:text="@string/btn_sign_in_posp_msg" />
 	    
+	    <Button
+	        android:id="@+id/btnConsume2"
+	        style="@style/btn_request_style"
+	        android:layout_marginLeft="15dp"
+	        android:text="@string/btn_consume_msg2" />
+	    
+	    <Button
+	        android:id="@+id/btnSignIn2"
+	        style="@style/btn_request_style"
+	        android:layout_marginLeft="15dp"
+	        android:text="@string/btn_sign_in_posp_msg2" />
+	    
+	    <Button
+	        android:id="@+id/btnIdentityAuth"
+	        style="@style/btn_request_style"
+	        android:layout_marginLeft="15dp"
+	        android:text="@string/btn_identity_auth_msg" />
+	    
 	</LinearLayout>
 	
     <TextView

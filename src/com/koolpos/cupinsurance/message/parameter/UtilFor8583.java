@@ -20,6 +20,13 @@ public class UtilFor8583 implements Constant {
 	private UtilFor8583() {
 
 	}
+	
+	public void clearUtilFor8583() {
+		instance = null;
+		trans = null;
+		terminalConfig = null;
+		oldTrans = null;
+	}
 
 	public String apOrderId = ""; // 通联订单号 F40 6F10
 	public String payOrderBatch = ""; // 批次号 F40 6F08

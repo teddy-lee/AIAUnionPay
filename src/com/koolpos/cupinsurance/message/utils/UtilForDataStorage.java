@@ -19,7 +19,7 @@ public class UtilForDataStorage {
 	 * @return Returns a map containing a list of pairs key/value representing the preferences.
 	 */
 	public static Map<String, ?> readPropertyBySharedPreferences(Context context, String preferencesName) {
-		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_MULTI_PROCESS);
+		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
 		if (null == preferences) {
 			return null;
 		}
@@ -35,7 +35,7 @@ public class UtilForDataStorage {
 	 * @param map Map<String, Object>
 	 */
 	public static void savePropertyBySharedPreferences(Context context, String preferencesName, Map<String, Object> map) {
-		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_MULTI_PROCESS);
+		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preferences.edit();
 		Iterator<Map.Entry<String, Object>> iter = map.entrySet().iterator(); 
 		while (iter.hasNext()) { 
@@ -48,14 +48,14 @@ public class UtilForDataStorage {
 	}
 	
 	public static void clearPropertyBySharedPreferences(Context context, String preferencesName) {
-		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_MULTI_PROCESS);
+		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preferences.edit();
 		editor.clear();
 		editor.commit();
 	}
 	
 	public static void removePropertyBySharedPreferences(Context context, String preferencesName, JSONArray array) {
-		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_MULTI_PROCESS);
+		SharedPreferences preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preferences.edit();
 		for (int i = 0; i < array.length(); i++) {
 			editor.remove(array.optString(i));

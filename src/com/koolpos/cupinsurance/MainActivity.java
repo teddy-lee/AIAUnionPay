@@ -34,13 +34,16 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	
 	private Button btnSignIn;
 	private Button btnConsume;
+	private Button btnSignIn2;
+	private Button btnConsume2;
+	private Button btnIdentityAuth;
 	private TextView commonTextView;
 	
 	// 签到报文
 	byte[] data;// = hex2byte("00456000010000000000000000000000000000000060211000000008000020000000C0001000000130303030303030313838383838383831303030303031300011010000010030");
 
 	String data8583 = "";
-	String payKeyIndex = "01";
+	String payKeyIndex = "00";
 	
 	 private final int FINISH_TRANSACTION_HANDLER = 1;
 	 private CardSwiper ex_cardSwiper;
@@ -50,6 +53,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	 private String transAmount = "1.00";
 	 private String pinblock;
 	 private JSONObject transJsonObj = new JSONObject();
+	 private boolean isConsuming = false;
+	 private String merchId;
+	 private String termId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +70,12 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 		btnSignIn.setOnClickListener(this);
 		btnConsume = (Button) findViewById(R.id.btnConsume);
 		btnConsume.setOnClickListener(this);
+		btnSignIn2 = (Button) findViewById(R.id.btnSignIn2);
+		btnSignIn2.setOnClickListener(this);
+		btnConsume2 = (Button) findViewById(R.id.btnConsume2);
+		btnConsume2.setOnClickListener(this);
+		btnIdentityAuth = (Button) findViewById(R.id.btnIdentityAuth);
+		btnIdentityAuth.setOnClickListener(this);
 		
 		commonTextView = (TextView) findViewById(R.id.resultText);
 	}
@@ -92,9 +104,33 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 		commonTextView.setText("");
 		switch (view.getId()) {
 		case R.id.btnSignIn:
+			merchId = "888888810000002";
+			payKeyIndex = "00";
 			new ExeSignInThread().start();
 			break;
 		case R.id.btnConsume:
+			merchId = "888888810000002";
+			payKeyIndex = "00";
+			isConsuming = true;
+			showMessageInTextView("请刷卡");
+			onStartSwiper(this);
+			onStartReadICData(this, payKeyIndex, transAmount);
+			break;
+		case R.id.btnSignIn2:
+			merchId = "888888820000002";
+			payKeyIndex = "01";
+			new ExeSignInThread().start();
+			break;
+		case R.id.btnConsume2:
+			merchId = "888888820000002";
+			payKeyIndex = "01";
+			isConsuming = true;
+			showMessageInTextView("请刷卡");
+			onStartSwiper(this);
+			onStartReadICData(this, payKeyIndex, transAmount);
+			break;
+		case R.id.btnIdentityAuth:
+			isConsuming = false;
 			showMessageInTextView("请刷卡");
 			onStartSwiper(this);
 			onStartReadICData(this, "00", transAmount);
@@ -156,9 +192,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
                             transJsonObj.put("track3", trackData.get("track3"));
                             transJsonObj.put("validTime", trackData.get("validTime"));
                             
-                            PinPadManager pinpad = PinPadManager.getInstance();
-                            pinpad.setParams(MainActivity.this, jsonObject, mTransactionHandler);
-                            pinpad.start();
+                            if (isConsuming) {
+                            	PinPadManager pinpad = PinPadManager.getInstance();
+                            	pinpad.setParams(MainActivity.this, jsonObject, mTransactionHandler);
+                            	pinpad.start();
+                            } else {
+                            	//TODO: identity authentication
+                            	makeTransactionParams();
+                            	new ExeIdentityAuthentication().start();
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -220,7 +262,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
                     try {
                         transData.put("isCancelled", true);
                     } catch (JSONException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     onStopReadICData();
@@ -231,7 +272,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
                     try {
                         transData.put("isCancelled", true);
                     } catch (JSONException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     onStopReadICData();
@@ -244,7 +284,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
                     try {
                         transData.put("isCancelled", true);
                     } catch (JSONException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     onStopReadICData();
@@ -262,13 +301,18 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 
                         pinblock = pwd;
                     } catch (JSONException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     UtilFor8583.getInstance().trans.setEntryMode(ConstantUtils.ENTRY_IC_MODE);
                     onStopReadICData();
                     makeTransactionParams();
-                    new ExeTransactionThread().start();
+                    
+                    if (isConsuming) {
+                    	new ExeTransactionThread().start();
+                    } else {
+                    	//TODO: identity authentication
+                    	new ExeIdentityAuthentication().start();
+                    }
                     break;
                 }
                 case EMVICManager.TRADE_STATUS_READICCARDID: {
@@ -386,8 +430,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888820000002", "00000001", payKeyIndex);
-			JSONObject signInObj = iso8583.signIn();
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, "00000001", payKeyIndex);
+			JSONObject signInObj = iso8583.signIn(MainActivity.this);
 			System.out.println(signInObj.toString());
 		}
 		
@@ -396,12 +440,24 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	class ExeTransactionThread extends Thread {
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888820000002", "00000001", payKeyIndex);
-			JSONObject transObj = iso8583.exeTransaction(transJsonObj);
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, "00000001", payKeyIndex);
+			JSONObject transObj = iso8583.exeTransaction(MainActivity.this, transJsonObj);
 			if (null != transObj) {
 				System.out.println(transObj.toString());
 			}
 		}
 	}
+	
+	class ExeIdentityAuthentication extends Thread {
+		@Override
+		public void run() {
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888810000002", "00000001", payKeyIndex);
+			/*JSONObject transObj = iso8583.exeIdentityAuth(transJsonObj);
+			if (null != transObj) {
+				System.out.println(transObj.toString());
+			}*/
+		}
+	}
+
 
 }
