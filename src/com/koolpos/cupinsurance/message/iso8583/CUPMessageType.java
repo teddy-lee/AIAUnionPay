@@ -86,7 +86,7 @@ public class CUPMessageType implements Constant {
 					"49"), // 43
 			// 积分签到
 			new MessageTypeTable(TRAN_LOGIN_BONUS, "0820", "      ", "00", "00"), // 44
-			new MessageTypeTable(TRAN_CHECK_CARDHOLDER, "0100", "330000", "00",
+			new MessageTypeTable(TRAN_CHECK_CARDHOLDER, "0200", "330000", "00",
 					"01"), // 45
 
 			new MessageTypeTable(TRAN_UPLOAD_MAG_OFFLINE, "0320", "      ",

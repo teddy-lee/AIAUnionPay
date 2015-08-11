@@ -105,11 +105,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 		switch (view.getId()) {
 		case R.id.btnSignIn:
 			merchId = "888888810000002";
+			termId = "00000001";
 			payKeyIndex = "00";
 			new ExeSignInThread().start();
 			break;
 		case R.id.btnConsume:
 			merchId = "888888810000002";
+			termId = "00000001";
 			payKeyIndex = "00";
 			isConsuming = true;
 			showMessageInTextView("请刷卡");
@@ -118,11 +120,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 			break;
 		case R.id.btnSignIn2:
 			merchId = "888888820000002";
+			termId = "00000001";
 			payKeyIndex = "01";
 			new ExeSignInThread().start();
 			break;
 		case R.id.btnConsume2:
 			merchId = "888888820000002";
+			termId = "00000001";
 			payKeyIndex = "01";
 			isConsuming = true;
 			showMessageInTextView("请刷卡");
@@ -130,10 +134,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 			onStartReadICData(this, payKeyIndex, transAmount);
 			break;
 		case R.id.btnIdentityAuth:
+			merchId = "888888810000002";
+			termId = "00000001";
+			payKeyIndex = "00";
 			isConsuming = false;
 			showMessageInTextView("请刷卡");
 			onStartSwiper(this);
-			onStartReadICData(this, "00", transAmount);
+			onStartReadICData(this, payKeyIndex, transAmount);
 			break;
 		default:
 			break;
@@ -408,8 +415,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
             transJsonObj.put("transAmount", "1");
             transJsonObj.put("F62", "8686860211000496799");
             transJsonObj.put("F60.6", "00000000");
-            transJsonObj.put("F61", "885522");
-            transJsonObj.put("idCard", "885522");
+            transJsonObj.put("F61", "130412");
+            transJsonObj.put("idCard", "130412");
             transJsonObj.put("openBrh", "");//paymentInfo.getOpenBrh()
             transJsonObj.put("F40_6F20", "");//paymentInfo.getOpenBrh()
             transJsonObj.put("iposId", "00000001");
@@ -430,7 +437,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, "00000001", payKeyIndex);
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, termId, payKeyIndex);
 			JSONObject signInObj = iso8583.signIn(MainActivity.this);
 			System.out.println(signInObj.toString());
 		}
@@ -440,7 +447,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	class ExeTransactionThread extends Thread {
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, "00000001", payKeyIndex);
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, termId, payKeyIndex);
 			JSONObject transObj = iso8583.exeTransaction(MainActivity.this, transJsonObj);
 			if (null != transObj) {
 				System.out.println(transObj.toString());
@@ -451,11 +458,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Card
 	class ExeIdentityAuthentication extends Thread {
 		@Override
 		public void run() {
-			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, "888888810000002", "00000001", payKeyIndex);
-			/*JSONObject transObj = iso8583.exeIdentityAuth(transJsonObj);
+			ISO8583Engine iso8583 = ISO8583Engine.getInstance(MainActivity.this, merchId, termId, payKeyIndex);
+			JSONObject transObj = iso8583.exeIdentityAuth(MainActivity.this, transJsonObj);
 			if (null != transObj) {
 				System.out.println(transObj.toString());
-			}*/
+			}
 		}
 	}
 

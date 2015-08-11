@@ -60,7 +60,7 @@ public class CUPPack
       /* 045 */new ISOTable(45, (short)  76,( (byte)(FLLVAR + ATTANS  ) ) ), // "TRACK 1 DATA"),
       /* 046 */new ISOTable(46, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ), // "ADITIONAL DATA - ISO"), (CUP Operator ID)
       /* 047 */new ISOTable(47, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ),
-      /* 048 */new ISOTable(48, (short) 999,( (byte)(FLLLVAR+ ATTN    ) ) ),
+      /* 048 */new ISOTable(48, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ),
       /* 049 */new ISOTable(49, (short)   3,( (byte)(FFIX   + ATTAN   ) ) ),
       /* 050 */new ISOTable(50, (short)   3,( (byte)(FFIX   + ATTAN   ) ) ),
       /* 051 */new ISOTable(51, (short)   3,( (byte)(FFIX   + ATTAN   ) ) ),
@@ -73,7 +73,7 @@ public class CUPPack
       /* 058 */new ISOTable(58, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ),
       /* 059 */new ISOTable(59, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ),
       /* 060 */new ISOTable(60, (short) 999,( (byte)(FLLLVAR+ ATTN    ) ) ), // 自定义域	：交易类型码	批次号 网络管理信息码
-      /* 061 */new ISOTable(61, (short) 999,( (byte)(FLLLVAR+ ATTN    ) ) ), // 冲正
+      /* 061 */new ISOTable(61, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ), // 冲正
       /* 062 */new ISOTable(62, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ), // 终端密钥
       /* 063 */new ISOTable(63, (short) 999,( (byte)(FLLLVAR+ ATTANS  ) ) ), // 自定义域	：操作员代码
       /* 064 */new ISOTable(64, (short)   8,( (byte)(FFIX   + ATTBIN  ) ) ) 

@@ -141,6 +141,40 @@ public class ISO8583Engine {
 		return responseObj;
 	}
 	
+	public JSONObject exeIdentityAuth(Context context, JSONObject transObj) {
+		JSONObject responseObj = null;
+		
+		//calculate traceNO
+		generateTraceNo();
+		cup8583Controller.identityAuthentication(transObj);
+		String str8583 = cup8583Controller.toString();
+		Log.w("request 8583", "request:" + str8583);
+	
+		
+		NetConnection connect = new NetConnection();
+		try {
+			String response8583 = connect.socketConnect(context, str8583);
+			
+			if (!TextUtils.isEmpty(response8583)) {
+				responseObj = ISO8583Util.convert8583(context, cup8583Controller, response8583);
+				
+			} else {
+				
+			}
+			
+			UtilFor8583 util8583 = UtilFor8583.getInstance();
+			if (null != util8583) {
+				util8583.clearUtilFor8583();
+			}
+			
+			cup8583Controller = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return responseObj;
+	}
+	
 	private void generateTraceNo() {
 		/*MessageUtil.calculateBatchTraceNo(context);
 		

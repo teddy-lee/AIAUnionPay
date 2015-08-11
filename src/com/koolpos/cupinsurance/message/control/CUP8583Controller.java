@@ -393,17 +393,6 @@ public class CUP8583Controller implements Constant {
 		paramer.trans.setTransType(TRAN_CHECK_CARDHOLDER);
 		paramer.trans.setApmpTransType(APMP_TRAN_CONSUME);
 		paramer.trans.setExpiry(jsonObject.optString("validTime"));
-		// fix no pin block original start
-		/*
-		 * int[] bitMap = { CUPField.F02_PAN, CUPField.F03_PROC,
-		 * CUPField.F04_AMOUNT, CUPField.F11_STAN, CUPField.F14_EXP,
-		 * CUPField.F22_POSE, CUPField.F23, CUPField.F25_POCC,
-		 * CUPField.F26_CAPTURE, CUPField.F35_TRACK2, CUPField.F36_TRACK3,
-		 * CUPField.F38_AUTH, CUPField.F39_RSP, CUPField.F40, CUPField.F41_TID,
-		 * CUPField.F42_ACCID, CUPField.F49_CURRENCY, CUPField.F52_PIN,
-		 * CUPField.F53_SCI, CUPField.F55_ICC, CUPField.F60, CUPField.F64_MAC };
-		 */
-		// fix no pin block original end
 
 		// fix no pin block start
 		int[] bitMap = null;
@@ -412,39 +401,36 @@ public class CUP8583Controller implements Constant {
 			if (pinblock.equals(ConstantUtils.STR_NULL_PIN)) {
 				paramer.trans.setPinMode(ConstantUtils.NO_PIN);
 				bitMap = new int[] { CUPField.F02_PAN, CUPField.F03_PROC,
-						CUPField.F04_AMOUNT, CUPField.F11_STAN,
-						CUPField.F14_EXP, CUPField.F22_POSE, CUPField.F23,
+						CUPField.F11_STAN, CUPField.F22_POSE, 
 						CUPField.F25_POCC, CUPField.F26_CAPTURE,
 						CUPField.F35_TRACK2, CUPField.F36_TRACK3,
-						CUPField.F41_TID, CUPField.F42_ACCID, CUPField.F48,
-						CUPField.F49_CURRENCY, CUPField.F55_ICC, CUPField.F60,
-						CUPField.F64_MAC };
+						CUPField.F41_TID, CUPField.F42_ACCID, 
+						CUPField.F48, CUPField.F49_CURRENCY, 
+						CUPField.F55_ICC, CUPField.F60,
+						CUPField.F61, CUPField.F64_MAC };
 			} else {
 				paramer.trans.setPinMode(ConstantUtils.HAVE_PIN);
 				paramer.trans.setPinBlock(Utility.hex2byte(pinblock));
 				bitMap = new int[] { CUPField.F02_PAN, CUPField.F03_PROC,
-						CUPField.F04_AMOUNT, CUPField.F11_STAN,
-						CUPField.F14_EXP, CUPField.F22_POSE, CUPField.F23,
+						CUPField.F11_STAN, CUPField.F22_POSE, 
 						CUPField.F25_POCC, CUPField.F26_CAPTURE,
 						CUPField.F35_TRACK2, CUPField.F36_TRACK3,
-						CUPField.F41_TID, CUPField.F42_ACCID, CUPField.F48,
-						CUPField.F49_CURRENCY, CUPField.F52_PIN,
-						CUPField.F53_SCI, CUPField.F55_ICC, CUPField.F60,
-						CUPField.F64_MAC };
+						CUPField.F41_TID, CUPField.F42_ACCID, 
+						CUPField.F48, CUPField.F49_CURRENCY, 
+						CUPField.F52_PIN, CUPField.F53_SCI, 
+						CUPField.F55_ICC, CUPField.F60,
+						CUPField.F61, CUPField.F64_MAC };
 			}
 		} else {
 			bitMap = new int[] { CUPField.F02_PAN, CUPField.F03_PROC,
-					CUPField.F04_AMOUNT, CUPField.F11_STAN, CUPField.F14_EXP,
-					CUPField.F22_POSE, CUPField.F23, CUPField.F25_POCC,
-					CUPField.F26_CAPTURE, CUPField.F35_TRACK2,
-					CUPField.F36_TRACK3,
-					/* CUPField.F38_AUTH, *//* CUPField.F39_RSP, *//*
-																	 * CUPField.F40
-																	 * ,
-																	 */
-					CUPField.F41_TID, CUPField.F42_ACCID, CUPField.F48,
-					CUPField.F49_CURRENCY, CUPField.F52_PIN, CUPField.F53_SCI,
-					CUPField.F55_ICC, CUPField.F60, CUPField.F64_MAC };
+					CUPField.F11_STAN, CUPField.F22_POSE, 
+					CUPField.F25_POCC, CUPField.F26_CAPTURE, 
+					CUPField.F35_TRACK2, CUPField.F36_TRACK3,
+					CUPField.F41_TID, CUPField.F42_ACCID, 
+					CUPField.F48, CUPField.F49_CURRENCY, 
+					CUPField.F52_PIN, CUPField.F53_SCI,
+					CUPField.F55_ICC, CUPField.F60, 
+					CUPField.F61, CUPField.F64_MAC };
 		}
 		// fix no pin block end
 		return mapAndPack(jsonObject, bitMap);
@@ -1439,6 +1425,8 @@ public class CUP8583Controller implements Constant {
 
 		byte[] encryptData = StringUtil.hexString2bytes(strDebug);
 		PinPadInterface.open();
+		
+		Log.e(APP_TAG, "calculate mac index:" + UtilFor8583.getInstance().terminalConfig.getKeyIndex());
 
 		int ret = PinPadInterface.selectKey(2,
 				Integer.parseInt(UtilFor8583.getInstance().terminalConfig.getKeyIndex()), 1, SINGLE_KEY);

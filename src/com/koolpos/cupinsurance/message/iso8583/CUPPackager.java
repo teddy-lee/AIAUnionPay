@@ -345,9 +345,8 @@ public class CUPPackager implements Constant {
 					break;
 				// 持卡人验证
 				case TRAN_CHECK_CARDHOLDER:
-					F48_Additional = new byte[1];
-					F48_Additional[0] = 0x00;
-					movGen(CUPField.F48, F48_Additional, 2);
+					String F48_Identity_Auth = "CK10#";
+					movGen(CUPField.F48, F48_Identity_Auth.getBytes(), 5);
 					break;
 			}
 		}
@@ -667,6 +666,27 @@ public class CUPPackager implements Constant {
 		}
 		// use full 61 from 0 to end for saving id card on super transfer --end
 		// add by Teddy on 22th October
+		
+		if (appState.trans != null && appState.trans.getTransType() == TRAN_CHECK_CARDHOLDER) {
+			byte[] F61_idCardNumber = null;
+			String idCard = appState.trans.getIdCardNo();
+			String subIdCard = "";
+			if (!idCard.contains("x")) {
+				subIdCard = idCard.substring(idCard.length() - 6, idCard.length());
+			} else {
+				subIdCard = idCard.substring(idCard.length() - 7, idCard.length() - 1);
+			}
+			subIdCard = "01000000000000" + subIdCard;
+			
+			String CUP_IDENTITY = "            CUPAM0010000000000000";
+			
+//			F61_idCardNumber = ByteUtil.str2Bcd(subIdCard + CUP_IDENTITY);
+			F61_idCardNumber = (subIdCard + CUP_IDENTITY).getBytes();
+
+			movGen(CUPField.F61, F61_idCardNumber, 53);
+			
+			return;
+		}
 
 		// 61.1
 		/* Check if Original Batch no. has data */
@@ -676,8 +696,8 @@ public class CUPPackager implements Constant {
 			System.arraycopy(
 					NumberUtil.intToBcd(appState.oldTrans.getOldBatch(), 3), 0,
 					tmpBuf, F61_Length / 2, 3);
+			F61_Length += 6;
 		}
-		F61_Length += 6;
 
 		// 61.2
 		// 撤销
@@ -687,8 +707,8 @@ public class CUPPackager implements Constant {
 			System.arraycopy(
 					NumberUtil.intToBcd(appState.oldTrans.getOldTrace(), 3), 0,
 					tmpBuf, F61_Length / 2, 3);
+			F61_Length += 6;
 		}
-		F61_Length += 6;
 
 		/*// 61.3
 		if (appState.trans.getTransType() == TRAN_REFUND
@@ -1895,7 +1915,11 @@ public class CUPPackager implements Constant {
 								}
 
 							} else {
-								F25_POCC[0] = (byte) 0x82;
+								if (appState.trans != null && appState.trans.getTransType() == TRAN_CHECK_CARDHOLDER) {
+									F25_POCC[0] = (byte) 0x00;
+								} else {
+									F25_POCC[0] = (byte) 0x82;
+								}
 								break;
 							}
 					}
